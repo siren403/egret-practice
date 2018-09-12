@@ -21,6 +21,9 @@ bin-release/
 manifest.json
 debug.log
 resource/
-
+egretProperties.json
+favicon.ico
+wingProperties.json
+template/runtime/
 
 **/~$*.pptx
