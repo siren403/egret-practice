@@ -10,13 +10,13 @@
         ],
         "types":[],
         "removeComments": true,
-        "alwaysStrict": true,
-        "strict": true
+        "alwaysStrict": true
     },
     "include": [
         "libs",
         "src"
     ],
     "exclude": [
+        "./src/ts"
     ]
 }

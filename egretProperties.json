@@ -1,0 +1,32 @@
+{
+  "engineVersion": "5.2.9",
+  "compilerVersion": "5.2.9",
+  "template": {},
+  "target": {
+    "current": "web"
+  },
+  "modules": [
+    {
+      "name": "egret"
+    },
+    {
+      "name": "eui"
+    },
+    {
+      "name": "assetsmanager"
+    },
+    {
+      "name": "tween"
+    },
+    {
+      "name": "game"
+    },
+    {
+      "name": "promise"
+    },
+    {
+      "name": "crypto-js",
+      "path": "../emong_lib/etc/crypto-js/libsrc/bin/crypto-js"
+    }
+  ]
+}
