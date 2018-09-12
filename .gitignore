@@ -20,9 +20,9 @@ bin-release/
 .wing/
 manifest.json
 debug.log
-resource/
-favicon.ico
+#resource/
+#favicon.ico
 wingProperties.json
-template/runtime/
+#template/runtime/
 
 **/~$*.pptx
