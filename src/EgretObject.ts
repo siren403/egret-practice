@@ -1,8 +1,14 @@
-abstract class EgretObject extends egret.DisplayObjectContainer implements IDisposable {
+class EgretObject extends egret.DisplayObjectContainer implements IDisposable {
 
-    public static create<T extends EgretObject>(constructor: IConstructor<T>, parent?: EgretObject): T {
-        let instance = new constructor();
-        Assert.isTrue(instance instanceof EgretObject);
+    public static create<T extends EgretObject>(constructor?: IConstructor<T>, parent?: EgretObject): T {
+
+        let instance = null;
+        if (constructor) {
+            instance = new constructor();
+            Assert.isTrue(instance instanceof EgretObject);
+        } else {
+            instance = new EgretObject();
+        }
         if (parent) {
             parent.add(instance);
         }
@@ -10,7 +16,7 @@ abstract class EgretObject extends egret.DisplayObjectContainer implements IDisp
         return instance;
     }
 
-    private _childArray: EgretObject[] = [];
+    private _children: EgretObject[] = [];
 
     public constructor() {
         super();
@@ -30,24 +36,27 @@ abstract class EgretObject extends egret.DisplayObjectContainer implements IDisp
 
     public dispose(): void {
         this.removeEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
-        for (let child of this._childArray) {
+        for (let child of this._children) {
             child.dispose();
             this.remove(child);
         }
-        this._childArray.splice(0);
+        this._children.splice(0);
     }
 
-    public onAwake(): void { }
-
+    protected onAwake(): void { }
 
     public add(object: EgretObject): void {
-        this._childArray.push(object);
+        this._children.push(object);
         this.addChild(object);
     }
     public remove(child: EgretObject): void {
         this.removeChild(child);
-        this._childArray.splice(this._childArray.indexOf(child), 1);
+        this._children.splice(this._children.indexOf(child), 1);
+
     }
 
+    public getChildren(): EgretObject[] {
+        return this._children;
+    }
 
 }
