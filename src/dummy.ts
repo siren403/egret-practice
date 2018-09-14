@@ -19,22 +19,6 @@ namespace loop {
     }
 }
 
-class SceneManager {
-
-    private static stage: egret.Stage = null;
-
-    public static initialize(stage: egret.Stage): void {
-        this.stage = stage;
-    }
-
-    public static loadScene(scene: IConstructor<Scene>): void {
-        let instance = new scene();
-        Assert.isTrue(instance instanceof Scene);
-        this.stage.addChild(instance);
-        instance.initialize(this.stage);
-    }
-}
-
 abstract class ShapeDisplay extends EgretObject {
     protected _shape: egret.Shape = null;
     public constructor() {
@@ -82,131 +66,6 @@ class LineDisplay extends ShapeDisplay {
     }
 }
 
-abstract class Scene extends EgretObject {
-
-    private resizeScreenDisposer: IDisposable = null;
-    private latestTime: number = 0;
-    private currentTime: number = 0;
-
-    private deltaTime: number = 0;
-    private deltaTimeMs: number = 0;
-
-    public initialize(stage: egret.Stage): void {
-        this.$stage = stage;
-        this.resizeScreenDisposer = Observer.onEgretEventAsObservable(this.stage, egret.Event.RESIZE).subscribe(this.onResizeScreen.bind(this));
-        this.onResizeScreen();
-
-        this.onAwake();
-    }
-
-    private onResizeScreen(): void {
-        this.x = this.stage.stageWidth * .5;
-        this.y = this.stage.stageHeight * .5;
-    }
-
-    public dispose(): void {
-        this.resizeScreenDisposer.dispose();
-        this.resizeScreenDisposer = null;
-    }
-
-    protected setEnableOnUpdate(isEnable: boolean): void {
-        if (isEnable === true) {
-            this.latestTime = egret.getTimer();
-            this.currentTime = egret.getTimer();
-            this.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
-        } else {
-            this.removeEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
-            this.deltaTime = 0;
-            this.deltaTimeMs = 0;
-        }
-    }
-
-    private onEnterFrame(): void {
-        this.currentTime = egret.getTimer();
-        this.deltaTimeMs = this.currentTime - this.latestTime;
-        this.deltaTime = this.deltaTimeMs / 1000;
-        this.latestTime = this.currentTime;
-        this.onUpdate(this.deltaTime);
-    }
-
-    protected onUpdate(deltaTime: number): void {
-
-    }
-
-}
-
-
-class IntroScene extends Scene {
-
-    private eui: EuiTest = null;
-    private missileContaner: EgretObject = null;
-
-    private missileCount: number = 500;
-
-    private isEui: boolean = false;
-
-    public onAwake(): void {
-        super.onAwake();
-
-        let width = this.stage.stageWidth;
-        let height = this.stage.stageHeight;
-
-        let background: RectDisplay = EgretObject.create(RectDisplay, this);
-        background.draw(width, height);
-
-
-        let halfWidth = width * .5;
-        let halfHeight = height * .5;
-        let hor: LineDisplay = EgretObject.create(LineDisplay, background);
-        hor.draw(-halfWidth, 0, width, 0, (setter) => setter(6, 0xff0000));
-
-        let vert: LineDisplay = EgretObject.create(LineDisplay, background);
-        vert.draw(0, -halfHeight, 0, height, (setter) => setter(2, 0xff0000));
-
-        this.missileContaner = EgretObject.create();
-        loop.range(this.missileCount, () => {
-            this.missileContaner.add(EgretObject.create(DisplayMissile));
-        });
-
-
-        this.eui = new EuiTest();
-        loop.range(this.missileCount, () => {
-            this.eui.addMissile(new EuiMissile());
-        });
-
-        this.add(this.missileContaner);
-        this.setEnableOnUpdate(true);
-
-        Observer.onTouchEndObservable(this.stage).subscribe(() => {
-            this.toggle();
-        });
-    }
-
-    private toggle(): void {
-        this.isEui = !this.isEui;
-        if (this.isEui) {
-            this.parent.addChild(this.eui);
-            this.remove(this.missileContaner);
-        } else {
-            this.add(this.missileContaner);
-            this.parent.removeChild(this.eui);
-        }
-    }
-
-    protected onUpdate(deltaTime): void {
-        super.onUpdate(deltaTime);
-
-        if (this.isEui) {
-            for (let m of this.eui.getChildren()) {
-                m.onUpdate(deltaTime);
-            }
-        } else {
-            for (let m of this.missileContaner.getChildren()) {
-                (m as DisplayMissile).onUpdate(deltaTime);
-            }
-        }
-    }
-}
 function random(min: number, max: number): number {
     return (Math.random() * (max - min)) + min;
 }
@@ -245,35 +104,6 @@ class DisplayMissile extends EgretObject {
     }
 }
 
-
-interface IEntryConfig {
-
-}
-abstract class Entry extends EgretObject {
-
-    protected onAddToStage(e: egret.Event): void {
-        super.onAddToStage(e);
-        egret.registerImplementation("eui.IAssetAdapter", new AssetAdapter());
-        egret.registerImplementation("eui.IThemeAdapter", new ThemeAdapter());
-
-        SceneManager.initialize(this.stage);
-
-        this.initialize();
-        this.parent.removeChild(this);
-    }
-
-    protected abstract initialize(): void;
-}
-
-
-namespace Type {
-    export const FUNCTION: string = 'function';
-    export const OBJECT: string = 'object';
-
-    export function is(target: any, type: string): boolean {
-        return (typeof target) === type;
-    }
-}
 
 class FrameCounter {
 

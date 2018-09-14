@@ -244,6 +244,10 @@ namespace Observer {
     export function onTouchEndObservable(target: egret.EventDispatcher): IObservable<egret.TouchEvent> {
         return new onTouchSubject(target, egret.TouchEvent.TOUCH_END).asObservable();
     }
+
+    export function onAddToStageObservable(target: egret.EventDispatcher): IObservable<egret.Event> {
+        return onEgretEventAsObservable(target, egret.Event.ADDED_TO_STAGE);
+    }
 }
 
 

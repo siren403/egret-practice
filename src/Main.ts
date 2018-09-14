@@ -29,18 +29,11 @@
 
 class Main extends Entry {
 
-
-    protected initialize(): void {
-
-        (RES.loadConfig("resource/default.res.json", "resource/") as Promise<void>).then(() => {
-            RES.loadGroup('preload');
-            new LazyLoadTheme("resource/default.thm.json", this.stage).do().then(() => {
-                SceneManager.loadScene(IntroScene);
-            });
-        });
-
-
-
-
+    protected get config(): IEntryConfig {
+        return {
+            scene: IntroScene
+        };
     }
+
+   
 }

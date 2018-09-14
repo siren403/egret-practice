@@ -1,6 +1,37 @@
-class EgretObject extends egret.DisplayObjectContainer implements IDisposable {
+class GameObject extends egret.DisplayObjectContainer implements IDisposable {
 
-    public static create<T extends EgretObject>(constructor?: IConstructor<T>, parent?: EgretObject): T {
+    protected _children: GameObject[] = [];
+
+    public get className(): string {
+        return Type.className(this);
+    }
+
+    public add(object: GameObject): void {
+        this._children.push(object);
+        this.addChild(object);
+    }
+    public remove(child: GameObject): void {
+        this.removeChild(child);
+        this._children.splice(this._children.indexOf(child), 1);
+    }
+
+    public getChildren(): GameObject[] {
+        return this._children;
+    }
+
+    public dispose(): void {
+        for (let child of this._children) {
+            child.dispose();
+            this.remove(child);
+        }
+        this._children.splice(0);
+    }
+
+    protected onAwake(): void { }
+}
+class EgretObject extends GameObject {
+
+    public static create<T extends GameObject>(constructor?: IConstructor<T>, parent?: GameObject): T {
 
         let instance = null;
         if (constructor) {
@@ -16,7 +47,6 @@ class EgretObject extends egret.DisplayObjectContainer implements IDisposable {
         return instance;
     }
 
-    private _children: EgretObject[] = [];
 
     public constructor() {
         super();
@@ -35,28 +65,10 @@ class EgretObject extends egret.DisplayObjectContainer implements IDisposable {
     }
 
     public dispose(): void {
+        super.dispose();
         this.removeEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
-        for (let child of this._children) {
-            child.dispose();
-            this.remove(child);
-        }
-        this._children.splice(0);
     }
 
-    protected onAwake(): void { }
 
-    public add(object: EgretObject): void {
-        this._children.push(object);
-        this.addChild(object);
-    }
-    public remove(child: EgretObject): void {
-        this.removeChild(child);
-        this._children.splice(this._children.indexOf(child), 1);
-
-    }
-
-    public getChildren(): EgretObject[] {
-        return this._children;
-    }
 
 }
