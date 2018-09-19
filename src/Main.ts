@@ -31,7 +31,7 @@ class Main extends Entry {
 
     protected get config(): IEntryConfig {
         return {
-            scene: IntroScene
+            scene: TitleScene
         };
     }
 

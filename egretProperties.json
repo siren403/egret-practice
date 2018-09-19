@@ -5,6 +5,17 @@
   "target": {
     "current": "web"
   },
+  "eui": {
+    "exmlRoot": [
+      "resource/eui_skins",
+      "resource/test"
+    ],
+    "themes": [
+      "resource/default.thm.json",
+      "resource/test/test.thm.json"
+    ],
+    "exmlPublishPolicy": "content"
+  },
   "modules": [
     {
       "name": "egret"

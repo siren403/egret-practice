@@ -51,11 +51,17 @@ abstract class Scene extends GameObject{
     protected create(): void { }
 
     private onResizeScreen(): void {
-        this.x = this.stage.stageWidth * .5;
-        this.y = this.stage.stageHeight * .5;
+        // this.x = this.stage.stageWidth * .5;
+        // this.y = this.stage.stageHeight * .5;
+        this.x = 0;
+        this.y = 0;
+        this.width = this.stage.stageWidth;
+        this.height = this.stage.stageHeight;
     }
 
     public dispose(): void {
+        super.dispose();
+        this.setEnableUpdate(false);
         Game.dispose(this.className);
     }
 

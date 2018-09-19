@@ -13,9 +13,9 @@ if (!Promise.wait) {
     };
 }
 if (!Promise.complete) {
-    Promise.complete = function (ani: egret.tween.TweenGroup) {
+    Promise.complete = function (dispatcher: egret.EventDispatcher) {
         return new Promise<void>((resolve, reject) => {
-            ani.once(egret.Event.COMPLETE, () => {
+            dispatcher.once(egret.Event.COMPLETE, () => {
                 resolve();
             }, this);
         });
