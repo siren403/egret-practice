@@ -1,4 +1,4 @@
-abstract class Scene extends GameObject{
+abstract class Scene extends GameObject {
 
     private _latestTime: number = 0;
     private _currentTime: number = 0;
@@ -9,9 +9,14 @@ abstract class Scene extends GameObject{
     private _isPreloaded: boolean = false;
 
     private _loader: Preloader = null;
+    private _container: { scene: DI.IContainter, game: DI.IContainter } = null;
 
-    public get loader(): Preloader {
+
+    protected get loader(): Preloader {
         return this._loader;
+    }
+    public get container(): { scene: DI.IContainter, game: DI.IContainter } {
+        return this._container;
     }
 
     public constructor() {
@@ -21,18 +26,18 @@ abstract class Scene extends GameObject{
             Observer.onAddToStageObservable(this).subscribe(this.onAddToStage.bind(this))
         )
         this._loader = new Preloader();
+        this._container = { scene: DI.create(), game: Game.container };
     }
 
     private onAddToStage(e: egret.Event): void {
-        if (this._isPreloaded) {
-            return;
-        }
-        this._isPreloaded = true;
-        this.preload();
+        if (this._isPreloaded === false) {
+            this._isPreloaded = true;
+            this.preload();
 
-        this._loader.load({
-            onProgress: () => { this.onPreloading(Math.floor(this._loader.progress * 100)); }
-        }).then(this.onPreloadComplete.bind(this));
+            this._loader.load({
+                onProgress: () => { this.onPreloading(Math.floor(this._loader.progress * 100)); }
+            }).then(this.onPreloadComplete.bind(this));
+        }
     }
 
 
@@ -62,6 +67,9 @@ abstract class Scene extends GameObject{
     public dispose(): void {
         super.dispose();
         this.setEnableUpdate(false);
+        this._container.scene.dispose();
+        this._container.scene = null;
+        this._container.game = null;
         Game.dispose(this.className);
     }
 

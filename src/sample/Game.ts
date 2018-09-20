@@ -2,13 +2,18 @@ class Game {
 
     private static _stage: egret.Stage = null;
     private static _disposables: IMap<IDisposable[]> = {};
+    private static _container: DI.IContainter = null;
 
     public static get stage(): egret.Stage {
         return this._stage;
     }
+    public static get container(): DI.IContainter {
+        return this._container;
+    }
 
     public static initialize(stage: egret.Stage): void {
         this._stage = stage;
+        this._container = DI.create();
     }
 
     public static addDisposables(key: string, ...args: IDisposable[]): void {
@@ -27,6 +32,8 @@ class Game {
             delete this._disposables[key];
         }
     }
+
+    
 
 }
 

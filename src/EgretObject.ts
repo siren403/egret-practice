@@ -27,7 +27,6 @@ class GameObject extends egret.DisplayObjectContainer implements IDisposable {
         this._children.splice(0);
     }
 
-    protected onAwake(): void { }
 }
 class EgretObject extends GameObject {
 
@@ -69,6 +68,6 @@ class EgretObject extends GameObject {
         this.removeEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
     }
 
-
+    protected onAwake(): void { }
 
 }

@@ -22,6 +22,10 @@ class IntroScene extends Scene {
     public create(): void {
         super.create();
 
+        SceneManager.loadScene(TitleScene);
+
+        return;
+
         let width = this.stage.stageWidth;
         let height = this.stage.stageHeight;
 
