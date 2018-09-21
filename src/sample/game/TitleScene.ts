@@ -294,9 +294,10 @@ class TitleScene extends Scene {
         let container = this.container.scene;
         container.bind(VM.iTestManyObject).to(VM.TestManyObject).asSingle();
 
-        this.setEnableUpdate(true);
-
+        this.setEnableUpdate(false);
         this.currentView = this.display;
+
+        
     }
 
     public toggle(): void {

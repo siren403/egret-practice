@@ -38,6 +38,10 @@
     {
       "name": "crypto-js",
       "path": "../emong_lib/etc/crypto-js/libsrc/bin/crypto-js"
+    },
+    {
+      "name": "proton",
+      "path":"../lib/proton/build"
     }
   ]
 }
