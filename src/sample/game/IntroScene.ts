@@ -1,9 +1,52 @@
+// abstract class CustomParticle extends particle.Particle {
+
+// }
+// abstract class CustomParticleSystem<T extends CustomParticle> extends particle.ParticleSystem {
+
+
+//     public constructor(particle: IConstructor<T>, texture: egret.Texture) {
+//         super(texture, 0);
+//         this.particleClass = particle;
+//     }
+
+//     public abstract initParticle(particle: T): void;
+
+//     public abstract advanceParticle(particle: T, dt: number): void;
+// }
+
+// class MyParticle extends CustomParticle {
+
+// }   
+// class MyParticleSystem extends CustomParticleSystem<MyParticle>{
+
+//     private _texture: egret.Texture = null;
+//     private _config: any = null;
+
+//     public constructor(particle: IConstructor<MyParticle>, texture: egret.Texture, config: any) {
+//         super(particle, texture);
+//         this._texture = texture;
+//         this._config = config;
+//         this.emissionRate = 4;
+//     }
+
+
+//     public initParticle(particle: MyParticle): void {
+//         particle.currentTime = 0;
+//         particle.totalTime = 10000;
+//         console.log('init:',particle);
+//     }
+
+//     public advanceParticle(particle: MyParticle, dt: number): void {
+//         console.log('ad:',particle);
+//     }
+// }
+
 class IntroScene extends Scene {
 
     private eui: EuiTest = null;
     private missileContaner: GameObject = null;
 
-    private missileCount: number = 500;
+    private missileCount: number = 1000;
 
     private isEui: boolean = false;
 
@@ -22,6 +65,12 @@ class IntroScene extends Scene {
     public create(): void {
         super.create();
 
+
+        let test = EgretObject.create(DisposeTest, this);
+
+
+        return;
+
         SceneManager.loadScene(TitleScene);
 
         return;
@@ -33,13 +82,11 @@ class IntroScene extends Scene {
         background.draw(width, height);
 
 
-        let halfWidth = width * .5;
-        let halfHeight = height * .5;
         let hor: LineDisplay = EgretObject.create(LineDisplay, background);
-        hor.draw(-halfWidth, 0, width, 0, (setter) => setter(6, 0xff0000));
+        hor.draw(0, height * .5, width, 0, (setter) => setter(6, 0xff0000));
 
         let vert: LineDisplay = EgretObject.create(LineDisplay, background);
-        vert.draw(0, -halfHeight, 0, height, (setter) => setter(2, 0xff0000));
+        vert.draw(width * .5, 0, 0, height, (setter) => setter(2, 0xff0000));
 
         this.missileContaner = EgretObject.create();
         loop.range(this.missileCount, () => {
@@ -48,11 +95,14 @@ class IntroScene extends Scene {
 
 
         this.eui = new EuiTest();
-        loop.range(this.missileCount, () => {
+        loop.range(this.missileCount * .5, () => {
             this.eui.addMissile(new EuiMissile());
         });
 
+
         this.add(this.missileContaner);
+        this.missileContaner.x = this.missileContaner.parent.measuredWidth * .5;
+        this.missileContaner.y = this.missileContaner.parent.measuredHeight * .5;
         this.setEnableUpdate(true);
 
         Observer.onTouchEndObservable(this.stage).subscribe(() => {
@@ -76,12 +126,28 @@ class IntroScene extends Scene {
 
         if (this.isEui) {
             for (let m of this.eui.getChildren()) {
-                m.onUpdate(deltaTime);
+                m.onUpdate();
             }
         } else {
             for (let m of this.missileContaner.getChildren()) {
-                (m as DisplayMissile).onUpdate(deltaTime);
+                (m as DisplayMissile).onUpdate();
             }
         }
+    }
+}
+
+class DisposeTest extends EgretObject {
+
+    protected onAwake(): void {
+        super.onAwake();
+
+        let a = new Observer.ReactiveProperty<number>(0);
+        let b = a.asObservable();
+        let c = b.subscribe((value) => console.log('event:',value), () => { }, () => console.log('dispose'))
+            .addTo(Game.adder(this));
+
+        a.value = 10;
+
+
     }
 }

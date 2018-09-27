@@ -15,7 +15,7 @@ abstract class Entry extends egret.DisplayObject {
 
     protected onAddToStage(e: egret.Event): void {
         Game.dispose(Type.className(this));
-        Game.initialize(this.stage);
+        Game.initialize(this.stage, true);
 
         egret.registerImplementation("eui.IAssetAdapter", new AssetAdapter());
         egret.registerImplementation("eui.IThemeAdapter", new ThemeAdapter());

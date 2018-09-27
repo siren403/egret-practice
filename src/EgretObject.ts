@@ -30,6 +30,9 @@ class GameObject extends egret.DisplayObjectContainer implements IDisposable {
 }
 class EgretObject extends GameObject {
 
+    private pivotX:number = 0;
+    private pivotY:number = 0;
+
     public static create<T extends GameObject>(constructor?: IConstructor<T>, parent?: GameObject): T {
 
         let instance = null;
@@ -41,6 +44,8 @@ class EgretObject extends GameObject {
         }
         if (parent) {
             parent.add(instance);
+        }else{
+            SceneManager.currentScene.add(instance);
         }
         instance.onAwake();
         return instance;
@@ -55,8 +60,6 @@ class EgretObject extends GameObject {
 
     protected onAddToStage(e: egret.Event): void {
         this.addEventListener(egret.Event.REMOVED_FROM_STAGE, this.onRemoveFromStage, this);
-        this.anchorOffsetX = this.width * .5;
-        this.anchorOffsetY = this.height * .5;
     }
 
     protected onRemoveFromStage(e: egret.Event): void {

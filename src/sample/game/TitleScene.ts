@@ -203,6 +203,26 @@ namespace DI {
     export function create(): IContainter {
         return new DIContainer();
     }
+
+
+
+    /**
+     * global
+     */
+    const container = new DIContainer();
+    export function bind<T>(_info: IContractInfo<T>): IConstructorBinder<T> {
+        return container.bind(_info);
+    }
+    export function bindClass<T>(_info: IContractInfo<T>): IScopeBinder<T> {
+        return container.bindClass(_info);
+    }
+    export function resolve<T>(_info: IContractInfo<T>): T {
+        return container.resolve(_info);
+    }
+    export function install(parent: IContainter): void {
+        return container.install(parent);
+    }
+
 }
 namespace VM {
     export interface ICommand {
@@ -252,6 +272,8 @@ namespace VM {
 namespace VM {
 
     export interface ITestManyObject {
+
+        totalCount: Observer.IReactivePropertyObservable<number>;
         updateCommand: ICommand;
     }
     export const iTestManyObject: DI.IContractInfo<ITestManyObject> = {
@@ -259,26 +281,35 @@ namespace VM {
     }
 
     export class TestManyObject extends BaseViewModel {
-        private _updateCommand: ICommand = null;
 
+        private objects: egret.Point[] = [];
+
+
+        private _totalCount: Observer.ReactiveProperty<number> = new Observer.ReactiveProperty(0);
+        public get totalCount(): Observer.IReactivePropertyObservable<number> {
+            return this._totalCount.asObservable();
+        }
+
+        private _updateCommand: ICommand = null;
         public get updateCommand(): ICommand {
             return this._updateCommand;
         }
+
+
         public constructor() {
             super();
-            this._updateCommand = new UpdateCommand(this.update.bind(this), () => true);
+            this._updateCommand = new UpdateCommand(() => {
+                this.onUpdate(Game.deltaTime);
+            }, () => true);
         }
 
-        protected update(): void {
+        protected onUpdate(deltaTime: number): void {
 
         }
     }
 
     class UpdateCommand extends BaseCommand { }
 }
-
-
-
 
 
 class TitleScene extends Scene {
@@ -291,8 +322,7 @@ class TitleScene extends Scene {
     public create(): void {
         super.create();
 
-        let container = this.container.scene;
-        container.bind(VM.iTestManyObject).to(VM.TestManyObject).asSingle();
+        DI.bind(VM.iTestManyObject).to(VM.TestManyObject).asSingle();
 
         this.setEnableUpdate(false);
         this.currentView = this.display;
@@ -301,38 +331,50 @@ class TitleScene extends Scene {
     }
 
     public toggle(): void {
+        if (this.currentView) {
+            this.remove(this.currentView);
+        }
         if (this.currentView === this.display) {
             this.currentView = this.eui;
         } else {
             this.currentView = this.display;
         }
+        this.add(this.currentView);
     }
 
     protected onUpdate(deltaTime: number): void {
         super.onUpdate(deltaTime);
-
+        if (this.currentView) {
+            this.currentView.onUpdate(deltaTime);
+        }
     }
 }
 
 class BaseTestManyObjectView extends EgretObject {
 
-    protected testManyObject: VM.ITestManyObject = null;
+    protected viewModel: VM.ITestManyObject = null;
+    protected displayObjects: IUpdatable[] = [];
 
     protected onAwake(): void {
         super.onAwake();
-        let container = SceneManager.currentScene.container.scene;
-        this.testManyObject = container.resolve(VM.iTestManyObject);
+        this.viewModel = DI.resolve(VM.iTestManyObject);
+        this.viewModel.totalCount.subscribe((count) => console.log(count), () => { }, () => console.log('dispose')).addTo(Game.adder(this));
     }
 
     public onUpdate(deltaTime: number): void {
+        // for (let display of this.displayObjects) {
+        //     display.onUpdate();
+        // }
 
+        this.viewModel.updateCommand.execute();
     }
+
 }
 class TestManyObjectByDisplayView extends BaseTestManyObjectView {
 
-
     protected onAwake(): void {
         super.onAwake();
+
 
     }
 }

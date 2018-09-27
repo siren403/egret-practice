@@ -2,18 +2,22 @@ class Game {
 
     private static _stage: egret.Stage = null;
     private static _disposables: IMap<IDisposable[]> = {};
-    private static _container: DI.IContainter = null;
+    private static _deltaTimer: DeltaTimer = null;
 
     public static get stage(): egret.Stage {
         return this._stage;
     }
-    public static get container(): DI.IContainter {
-        return this._container;
+
+    public static get deltaTime(): number {
+        return this._deltaTimer.deltaTime;
     }
 
-    public static initialize(stage: egret.Stage): void {
+    public static initialize(stage: egret.Stage, isDeltaTime: boolean = false): void {
         this._stage = stage;
-        this._container = DI.create();
+        if (isDeltaTime === true) {
+            this._deltaTimer = new DeltaTimer();
+            this._deltaTimer.start(this._stage);
+        }
     }
 
     public static addDisposables(key: string, ...args: IDisposable[]): void {
@@ -33,8 +37,12 @@ class Game {
         }
     }
 
-    
-
+    public static adder(gameobject: GameObject): ((disposer: IDisposable) => void) {
+        return (disposer) => {
+            let go = gameobject;
+            this.addDisposables(go.className, disposer);
+        }
+    }
 }
 
 // class Events {

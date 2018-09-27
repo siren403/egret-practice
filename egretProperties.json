@@ -42,6 +42,10 @@
     {
       "name": "proton",
       "path":"../lib/proton/build"
+    },
+    {
+      "name": "particle",
+      "path": "../emong_lib/egret_game/particle/libsrc"
     }
   ]
 }

@@ -14,9 +14,9 @@ namespace Observer {
 
     export interface IObservable<T> {
         subscribe(params: ISubscribeParameter<T>): IDisposable;
-        subscribe(onNext: Action<T>);
-        subscribe(onNext: Action<T>, onError: Action<Error>);
-        subscribe(onNext: Action<T>, onError: Action<Error>, onCompleted: Function);
+        subscribe(onNext: Action<T>): IDisposable;
+        subscribe(onNext: Action<T>, onError: Action<Error>): IDisposable;
+        subscribe(onNext: Action<T>, onError: Action<Error>, onCompleted: Function): IDisposable;
     }
     export interface ISubscribeParameter<T> {
         onNext: Action<T>,
@@ -65,6 +65,7 @@ namespace Observer {
         protected onUnsubscribed(): void { }
     }
 
+
     interface IObserver<T> {
         onCompleted(): void;
         onError(error: Error): void;
@@ -81,7 +82,7 @@ namespace Observer {
 
     class Observable<T> implements IObservable<T>, IDisposable {
 
-        private _subject: Subject<T> = null;
+        protected _subject: Subject<T> = null;
         private _isDisposed: boolean = false;
         // private _operators: Operator.IOperator[] = [];
 
@@ -119,16 +120,15 @@ namespace Observer {
             this._subject.subscribe(subscribe);
 
 
-            let disposer: IDisposable = new SubscribeDisposable(this._subject, subscribe);
-            this.dispose();
+            let disposer: IDisposable = new SubscribeDisposable(this._subject, subscribe, this);
             return disposer;
         }
-
 
         public dispose(): void {
             this._subject = null;
             this._isDisposed = true;
         }
+
     }
 
     class SubscribeDisposable<T> implements IDisposable {
@@ -137,7 +137,8 @@ namespace Observer {
 
         public constructor(
             private _origin: Subject<T>,
-            private _observer: IObserver<T>
+            private _observer: IObserver<T>,
+            private _observableDispoeser: IDisposable
         ) { }
 
         public dispose(): void {
@@ -148,6 +149,11 @@ namespace Observer {
             this._origin = null;
             this._observer = null;
             this._isDisposed = true;
+            this._observableDispoeser.dispose();
+        }
+
+        public addTo(func: ((disposer: IDisposable) => void)): void {
+            func(this);
         }
     }
 
@@ -247,6 +253,51 @@ namespace Observer {
 
     export function onAddToStageObservable(target: egret.EventDispatcher): IObservable<egret.Event> {
         return onEgretEventAsObservable(target, egret.Event.ADDED_TO_STAGE);
+    }
+
+
+    export class ReactiveProperty<T> extends Subject<T>{
+
+        private _value: T;
+        public get value(): T {
+            return this._value;
+        }
+        public set value(value: T) {
+            if (this._value !== value) {
+                this.onNext(value);
+            }
+            this._value = value
+        }
+
+        public constructor(value: T) {
+            super();
+            this._value = value;
+        }
+
+        public subscribe(observer: IObserver<T>): void {
+            super.subscribe(observer);
+            observer.onNext(this._value);
+        }
+        public asObservable(): IReactivePropertyObservable<T> {
+            return new ReactivePropertyObservable<T>(this);
+        }
+    }
+
+    export interface IReactivePropertyObservable<T> extends IObservable<T> {
+        value: T;
+    }
+    class ReactivePropertyObservable<T> extends Observable<T> implements IReactivePropertyObservable<T>{
+
+        public get value(): T {
+            return (this._subject as ReactiveProperty<T>).value;
+        }
+        public set value(value: T) {
+            (this._subject as ReactiveProperty<T>).value = value;
+        }
+    }
+
+    export interface IDisposable {
+        addTo?(func: (disposer: IDisposable) => void): void;
     }
 }
 

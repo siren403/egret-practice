@@ -1,21 +1,17 @@
 abstract class Scene extends GameObject {
 
-    private _latestTime: number = 0;
-    private _currentTime: number = 0;
-
-    private _deltaTime: number = 0;
-    private _deltaTimeMs: number = 0;
+    private _deltaTimer: DeltaTimer = null;
 
     private _isPreloaded: boolean = false;
 
     private _loader: Preloader = null;
-    private _container: { scene: DI.IContainter, game: DI.IContainter } = null;
+    private _container: DI.IContainter = null;
 
 
     protected get loader(): Preloader {
         return this._loader;
     }
-    public get container(): { scene: DI.IContainter, game: DI.IContainter } {
+    public get container(): DI.IContainter {
         return this._container;
     }
 
@@ -26,7 +22,8 @@ abstract class Scene extends GameObject {
             Observer.onAddToStageObservable(this).subscribe(this.onAddToStage.bind(this))
         )
         this._loader = new Preloader();
-        this._container = { scene: DI.create(), game: Game.container };
+        this._container = DI.create();
+        this._deltaTimer = new DeltaTimer();
     }
 
     private onAddToStage(e: egret.Event): void {
@@ -67,30 +64,23 @@ abstract class Scene extends GameObject {
     public dispose(): void {
         super.dispose();
         this.setEnableUpdate(false);
-        this._container.scene.dispose();
-        this._container.scene = null;
-        this._container.game = null;
+        this._container.dispose();
+        this._container = null;
         Game.dispose(this.className);
     }
 
     protected setEnableUpdate(isEnable: boolean): void {
         if (isEnable === true) {
-            this._latestTime = egret.getTimer();
-            this._currentTime = egret.getTimer();
+            this._deltaTimer.start(this);
             this.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
         } else {
+            this._deltaTimer.stop();
             this.removeEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
-            this._deltaTime = 0;
-            this._deltaTimeMs = 0;
         }
     }
 
     private onEnterFrame(): void {
-        this._currentTime = egret.getTimer();
-        this._deltaTimeMs = this._currentTime - this._latestTime;
-        this._deltaTime = this._deltaTimeMs / 1000;
-        this._latestTime = this._currentTime;
-        this.onUpdate(this._deltaTime);
+        this.onUpdate(this._deltaTimer.deltaTime);
     }
 
     protected onUpdate(deltaTime: number): void {

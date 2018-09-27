@@ -1,6 +1,7 @@
 namespace egret {
     export interface DisplayObject {
         setPivot(x: number, y: number);
+        setPivotFromParent(x: number, y: number);
     }
 }
 if (!egret.DisplayObject.prototype.setPivot) {
@@ -8,6 +9,15 @@ if (!egret.DisplayObject.prototype.setPivot) {
         let _this: egret.DisplayObject = this;
         _this.anchorOffsetX = _this.width * x;
         _this.anchorOffsetY = _this.height * y;
+    }
+}
+if (!egret.DisplayObject.prototype.setPivotFromParent) {
+    egret.DisplayObject.prototype.setPivotFromParent = function (x: number, y: number) {
+        let _this: egret.DisplayObject = this;
+        if (_this.parent) {
+            _this.x = _this.parent.width * x;
+            _this.y = _this.parent.height * y;
+        }
     }
 }
 namespace loop {
@@ -44,8 +54,6 @@ class RectDisplay extends ShapeDisplay {
         graphics.beginFill(color);
         graphics.drawRect(0, 0, width, height);
         graphics.endFill();
-        this._shape.x = -(width * .5);
-        this._shape.y = -(height * .5);
     }
 
 }
@@ -69,7 +77,13 @@ class LineDisplay extends ShapeDisplay {
 function random(min: number, max: number): number {
     return (Math.random() * (max - min)) + min;
 }
-class DisplayMissile extends EgretObject {
+
+
+interface IUpdatable {
+    onUpdate(): void;
+}
+
+class DisplayMissile extends EgretObject implements IUpdatable {
 
     private bitmap: egret.Bitmap;
     private distance: number = random(50, 400);
@@ -88,9 +102,9 @@ class DisplayMissile extends EgretObject {
 
     }
 
-    public onUpdate(deltaTime: number): void {
+    public onUpdate(): void {
 
-        this.acc += this.speed * deltaTime;
+        this.acc += this.speed * Game.deltaTime;
 
         if (this.acc > Math.PI * 2) {
             this.acc = 0;
@@ -101,8 +115,12 @@ class DisplayMissile extends EgretObject {
 
         this.x = x;
         this.y = y;
+
+        // this.x = Game.stage.stageWidth * .5 + x;
+        // this.y = Game.stage.stageHeight * .5 + y;
     }
 }
+
 
 
 class FrameCounter {
@@ -149,7 +167,7 @@ class EuiTest extends eui.Component {
         return this.missiles;
     }
 }
-class EuiMissile extends eui.Component {
+class EuiMissile extends eui.Component implements IUpdatable {
 
     private distance: number = random(50, 400);
     private speed: number = random(1, 10);
@@ -172,9 +190,9 @@ class EuiMissile extends eui.Component {
         this.setPivot(.5, .5);
     }
 
-    public onUpdate(deltaTime: number): void {
+    public onUpdate(): void {
 
-        this.acc += this.speed * deltaTime;
+        this.acc += this.speed * Game.deltaTime;
 
         if (this.acc > Math.PI * 2) {
             this.acc = 0;
@@ -203,5 +221,39 @@ class LazyLoadTheme {
                 resolve();
             }, this);
         })
+    }
+}
+
+class DeltaTimer {
+
+    private _latestTime: number = 0;
+    private _currentTime: number = 0;
+
+    private _deltaTime: number = 0;
+    private _deltaTimeMs: number = 0;
+
+    private _dispatcher: egret.EventDispatcher = null;
+
+    public get deltaTime(): number {
+        return this._deltaTime;
+    }
+
+    private onEnterFrame(): void {
+        this._currentTime = egret.getTimer();
+        this._deltaTimeMs = this._currentTime - this._latestTime;
+        this._deltaTime = this._deltaTimeMs / 1000;
+        this._latestTime = this._currentTime;
+    }
+
+    public start(dispatcher: egret.EventDispatcher): void {
+        this._latestTime = egret.getTimer();
+        this._currentTime = egret.getTimer();
+        this._dispatcher = dispatcher;
+        this._dispatcher.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
+    }
+    public stop(): void {
+        this._dispatcher.removeEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
+        this._deltaTime = 0;
+        this._deltaTimeMs = 0;
     }
 }
