@@ -111,7 +111,7 @@ namespace Observer {
             }
 
             let subscribe: Subscribe<T> = null;
-            if (Type.is(args[0], Type.OBJECT)) {
+            if (type.compare(args[0], type.OBJECT)) {
                 let params = args[0] as ISubscribeParameter<T>;
                 subscribe = new Subscribe(params.onNext, params.onError, params.onCompleted);
             } else {

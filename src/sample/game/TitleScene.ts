@@ -25,6 +25,7 @@ namespace DI {
     export interface IContractInfo<T> {
         type: eContractType;
         classConstructor?: IConstructor<T>;
+        props?:any;
     }
 
     export interface IBinder<T>
@@ -164,7 +165,7 @@ namespace DI {
     }
     class DIContainer implements IContainter {
 
-        protected cachedBinders = Type.createMap();
+        protected cachedBinders = type.createMap();
         protected parent: IContainter = null;
 
         public bind<T>(_info: IContractInfo<T>): IConstructorBinder<T> {
@@ -275,6 +276,7 @@ namespace VM {
 
         totalCount: Observer.IReactivePropertyObservable<number>;
         updateCommand: ICommand;
+        currentCount: number;
     }
     export const iTestManyObject: DI.IContractInfo<ITestManyObject> = {
         type: DI.eContractType.INTERFACE
@@ -295,6 +297,7 @@ namespace VM {
             return this._updateCommand;
         }
 
+        public currentCount:number = 0;
 
         public constructor() {
             super();

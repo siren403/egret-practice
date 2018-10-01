@@ -1,8 +1,8 @@
-namespace Type {
+namespace type {
     export const FUNCTION: string = 'function';
     export const OBJECT: string = 'object';
 
-    export function is(target: any, type: string): boolean {
+    export function compare(target: any, type: string): boolean {
         return (typeof target) === type;
     }
 
@@ -76,5 +76,10 @@ namespace Type {
             map = new Map<TKey, TValue>();
         }
         return map;
+    }
+
+    /** require egret */
+    export function is(instance: any, type: string): boolean {
+        return (instance['__types__'] as Array<string>).indexOf(type) !== -1;
     }
 }

@@ -3,7 +3,7 @@ class GameObject extends egret.DisplayObjectContainer implements IDisposable {
     protected _children: GameObject[] = [];
 
     public get className(): string {
-        return Type.className(this);
+        return type.className(this);
     }
 
     public add(object: GameObject): void {
@@ -29,9 +29,6 @@ class GameObject extends egret.DisplayObjectContainer implements IDisposable {
 
 }
 class EgretObject extends GameObject {
-
-    private pivotX:number = 0;
-    private pivotY:number = 0;
 
     public static create<T extends GameObject>(constructor?: IConstructor<T>, parent?: GameObject): T {
 

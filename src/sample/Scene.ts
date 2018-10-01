@@ -8,7 +8,7 @@ abstract class Scene extends GameObject {
     private _container: DI.IContainter = null;
 
 
-    protected get loader(): Preloader {
+    protected get load(): Preloader {
         return this._loader;
     }
     public get container(): DI.IContainter {
@@ -23,7 +23,7 @@ abstract class Scene extends GameObject {
         )
         this._loader = new Preloader();
         this._container = DI.create();
-        this._deltaTimer = new DeltaTimer();
+        this._deltaTimer = new DeltaTimer(this);
     }
 
     private onAddToStage(e: egret.Event): void {
@@ -71,7 +71,7 @@ abstract class Scene extends GameObject {
 
     protected setEnableUpdate(isEnable: boolean): void {
         if (isEnable === true) {
-            this._deltaTimer.start(this);
+            this._deltaTimer.start();
             this.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
         } else {
             this._deltaTimer.stop();

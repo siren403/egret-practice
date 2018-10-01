@@ -53,9 +53,9 @@ class IntroScene extends Scene {
     protected preload(): void {
         super.preload();
 
-        this.loader.config("resource/default.res.json");
-        this.loader.theme("resource/default.thm.json");
-        this.loader.group('preload');
+        this.load.config("resource/default.res.json");
+        this.load.theme("resource/default.thm.json");
+        this.load.group('preload');
     }
 
     protected onPreloading(progress: number): void {
@@ -65,12 +65,7 @@ class IntroScene extends Scene {
     public create(): void {
         super.create();
 
-
-        let test = EgretObject.create(DisposeTest, this);
-
-
         return;
-
         SceneManager.loadScene(TitleScene);
 
         return;
@@ -143,11 +138,14 @@ class DisposeTest extends EgretObject {
 
         let a = new Observer.ReactiveProperty<number>(0);
         let b = a.asObservable();
-        let c = b.subscribe((value) => console.log('event:',value), () => { }, () => console.log('dispose'))
+        b.subscribe((value) => console.log('event:',value), () => { }, () => console.log('dispose'))
             .addTo(Game.adder(this));
 
-        a.value = 10;
+        b.value = 10;
 
+        a.onCompleted();
 
+        b.value = 1;
+        
     }
 }

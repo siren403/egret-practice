@@ -15,8 +15,8 @@ class Game {
     public static initialize(stage: egret.Stage, isDeltaTime: boolean = false): void {
         this._stage = stage;
         if (isDeltaTime === true) {
-            this._deltaTimer = new DeltaTimer();
-            this._deltaTimer.start(this._stage);
+            this._deltaTimer = new DeltaTimer(this._stage);
+            this._deltaTimer.start();
         }
     }
 

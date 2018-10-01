@@ -234,6 +234,10 @@ class DeltaTimer {
 
     private _dispatcher: egret.EventDispatcher = null;
 
+    public constructor(dispatcher: egret.EventDispatcher){
+        this._dispatcher = dispatcher;
+    }
+
     public get deltaTime(): number {
         return this._deltaTime;
     }
@@ -245,15 +249,37 @@ class DeltaTimer {
         this._latestTime = this._currentTime;
     }
 
-    public start(dispatcher: egret.EventDispatcher): void {
+    public start(): void {
         this._latestTime = egret.getTimer();
         this._currentTime = egret.getTimer();
-        this._dispatcher = dispatcher;
         this._dispatcher.addEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
     }
     public stop(): void {
         this._dispatcher.removeEventListener(egret.Event.ENTER_FRAME, this.onEnterFrame, this);
         this._deltaTime = 0;
         this._deltaTimeMs = 0;
+
     }
+}
+class CustomComponent {
+    public render(): string {
+        return 'render';
+    }
+}
+const withComponent = (url: string) => (wrappedComponent: CustomComponent) => {
+    return class extends CustomComponent {
+
+        public a = 0;
+
+        public do() {
+            console.log(url, wrappedComponent.render());
+            return 'do';
+        }
+    }
+}
+
+
+class Plane{
+    public v:number = 0;
+    public n:string = 'name';
 }

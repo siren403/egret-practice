@@ -8,13 +8,13 @@ abstract class Entry extends egret.DisplayObject {
     public constructor() {
         super();
         Game.addDisposables(
-            Type.className(this),
+            type.className(this),
             Observer.onEgretEventAsObservable(this, egret.Event.ADDED_TO_STAGE).subscribe(this.onAddToStage.bind(this))
         );
     }
 
     protected onAddToStage(e: egret.Event): void {
-        Game.dispose(Type.className(this));
+        Game.dispose(type.className(this));
         Game.initialize(this.stage, true);
 
         egret.registerImplementation("eui.IAssetAdapter", new AssetAdapter());
