@@ -234,7 +234,7 @@ class DeltaTimer {
 
     private _dispatcher: egret.EventDispatcher = null;
 
-    public constructor(dispatcher: egret.EventDispatcher){
+    public constructor(dispatcher: egret.EventDispatcher) {
         this._dispatcher = dispatcher;
     }
 
@@ -277,9 +277,39 @@ const withComponent = (url: string) => (wrappedComponent: CustomComponent) => {
         }
     }
 }
+const logComponent = (condition: (() => boolean)) => (log: string) => {
+    if (condition()) {
+        console.log(log);
+    }
+}
+class Logger {
+    public static regist(key: string, func: Function): void {
+        Logger[key] = func;
+    }
+}
+const LoggerGenerator: (<T>(map, origin) => (key) => T) = (map, origin) => (key) => {
+    origin = origin || {};
+    return (origin[key] || (origin[map[key]] = (function (log: string) {
+        if (origin.flag === key) {
+            console.log(log);
+        }
+    }))) && origin;
+}
+enum LogFlags {
+    info, log
+}
+interface ILogger<T> {
+    flag: T;
+    info(log: string): void;
+    log(log: string): void;
+}
+// let logger = LoggerGenerator<ILogger<LogFlags>>(LogFlags, {})(LogFlags.info);
+// logger = LoggerGenerator<ILogger<LogFlags>>(LogFlags, logger)(LogFlags.log);
 
+// logger.info('asd');
+// logger.flag = LogFlags.info;
 
-class Plane{
-    public v:number = 0;
-    public n:string = 'name';
+class Plane {
+    public v: number = 0;
+    public n: string = 'name';
 }
